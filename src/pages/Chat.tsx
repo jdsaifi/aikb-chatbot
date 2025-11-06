@@ -38,13 +38,46 @@ const Chat = () => {
     const navigate = useNavigate();
     const { query: executeKBQuery } = useKBQuery();
 
+    const scrollToBottom = () => {
+        // Use requestAnimationFrame to ensure DOM has updated
+        requestAnimationFrame(() => {
+            if (scrollAreaRef.current) {
+                // Access the viewport element inside ScrollArea
+                // Try multiple selectors to find the viewport
+                let viewport = scrollAreaRef.current.querySelector(
+                    '[data-radix-scroll-area-viewport]'
+                ) as HTMLElement;
+
+                if (!viewport) {
+                    viewport = scrollAreaRef.current.querySelector(
+                        '.h-full.w-full'
+                    ) as HTMLElement;
+                }
+
+                if (!viewport && scrollAreaRef.current.firstElementChild) {
+                    viewport = scrollAreaRef.current
+                        .firstElementChild as HTMLElement;
+                }
+
+                if (viewport) {
+                    viewport.scrollTo({
+                        top: viewport.scrollHeight,
+                        behavior: 'smooth',
+                    });
+                }
+            }
+        });
+    };
+
     useEffect(() => {
-        // Scroll to bottom when new messages are added
-        if (scrollAreaRef.current) {
-            scrollAreaRef.current.scrollTop =
-                scrollAreaRef.current.scrollHeight;
-        }
-    }, [messages]);
+        // Scroll to bottom when messages change or loading state changes
+        scrollToBottom();
+    }, [messages, isLoading]);
+
+    // Scroll to bottom on initial mount
+    useEffect(() => {
+        scrollToBottom();
+    }, []);
 
     const handleSendMessage = async () => {
         if (!inputValue.trim() || isLoading) return;
@@ -71,19 +104,33 @@ const Chat = () => {
                 const kbResponse = response.data[0];
                 setConversationId(kbResponse?.conversationId || null);
 
+                // references = [
+                //     {
+                //       id: new ObjectId('68f74f911c7c1ded3a0f758b'),
+                //       title: 'tmformfree-TM-12.pdf',
+                //       preview: 'FORM TM -12 \n' +
+                //         'THE TRADE MARKS ACT, 1999 \n' +
+                //         'Agents code No: \n' +
+                //         'Proprietors code No: \n' +
+                //         'Fee: See entries Nos....',
+                //       path: 'ipr/trademarks/tmformfree-TM-12.pdf'
+                //     },
+                // ]
+
                 const assistantMessage: Message = {
                     id: (Date.now() + 1).toString(),
                     content: kbResponse.response,
                     role: 'assistant',
                     timestamp: new Date(),
-                    documents: [
-                        // {
-                        //     id: '1',
-                        //     title: 'Knowledge Base Response',
-                        //     url: '#',
-                        //     preview: `Query: ${kbResponse.query}`,
-                        // },
-                    ],
+                    documents: kbResponse.references || [],
+                    // [
+                    //     // {
+                    //     //     id: '1',
+                    //     //     title: 'Knowledge Base Response',
+                    //     //     url: '#',
+                    //     //     preview: `Query: ${kbResponse.query}`,
+                    //     // },
+                    // ],
                 };
 
                 setMessages((prev) => [...prev, assistantMessage]);
@@ -144,19 +191,48 @@ const Chat = () => {
         action: 'view' | 'download',
         doc: Document
     ) => {
-        if (action === 'download') {
+        if (doc.url) {
             toast({
-                title: 'Download Started',
-                description: `Downloading ${doc.title}...`,
+                title: 'Redirecting',
+                description: `Redirecting to ${doc.title}...`,
             });
-            // Implement actual download logic here
+            const url = `${import.meta.env.VITE_API_ROOTURL}/uploads/${
+                doc.url
+            }`;
+            return window.open(url, '_blank');
         } else {
             toast({
-                title: 'Opening Document',
-                description: `Opening ${doc.title} for viewing...`,
+                title: 'Error',
+                description: 'No URL found for the document.',
             });
-            // Implement actual view logic here
         }
+
+        return;
+        // if (action === 'download') {
+        //     toast({
+        //         title: 'Download Started',
+        //         description: `Downloading ${doc.title}...`,
+        //     });
+        //     // Implement actual download logic here
+
+        // } else {
+        //     toast({
+        //         title: 'Opening Document',
+        //         description: `Opening ${doc.title} for viewing...`,
+        //     });
+        //     // Implement actual view logic here
+        //     if (doc.url) {
+        //         const url = `${import.meta.env.VITE_API_ROOTURL}/uploads/${
+        //             doc.url
+        //         }`;
+        //         return window.open(url, '_blank');
+        //     } else {
+        //         toast({
+        //             title: 'Error',
+        //             description: 'No URL found for the document.',
+        //         });
+        //     }
+        // }
     };
 
     return (
@@ -199,6 +275,7 @@ const Chat = () => {
                 </div>
 
                 {/* Chat Messages */}
+                {/* open chat with scroll to bottom */}
                 <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
                     <div className="space-y-4 max-w-4xl mx-auto">
                         {messages.length === 0 ? (
@@ -293,7 +370,7 @@ const Chat = () => {
                                                                                 )}
                                                                             </div>
                                                                             <div className="flex space-x-1 ml-2">
-                                                                                <Button
+                                                                                {/* <Button
                                                                                     size="sm"
                                                                                     variant="ghost"
                                                                                     onClick={() =>
@@ -304,7 +381,7 @@ const Chat = () => {
                                                                                     }
                                                                                 >
                                                                                     <Eye className="h-3 w-3" />
-                                                                                </Button>
+                                                                                </Button> */}
                                                                                 <Button
                                                                                     size="sm"
                                                                                     variant="ghost"

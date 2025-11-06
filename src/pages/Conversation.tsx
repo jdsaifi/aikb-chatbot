@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { kbQueryService } from '../services/kbQueryService';
 import ConversationSidebar from '@/components/ConversationSidebar';
+import { Reference } from '../schemas/kbQuerySchemas';
 
 interface Message {
     id: string;
@@ -26,6 +27,17 @@ interface Document {
     title: string;
     url?: string;
     preview?: string;
+}
+
+interface KBConversationHistory {
+    _id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    references: Reference[];
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+    id: string;
 }
 
 const Conversation = () => {
@@ -44,13 +56,41 @@ const Conversation = () => {
 
     // console.log('data:', conversationData);
 
+    const scrollToBottom = () => {
+        // Use requestAnimationFrame to ensure DOM has updated
+        requestAnimationFrame(() => {
+            if (scrollAreaRef.current) {
+                // Access the viewport element inside ScrollArea
+                // Try multiple selectors to find the viewport
+                let viewport = scrollAreaRef.current.querySelector(
+                    '[data-radix-scroll-area-viewport]'
+                ) as HTMLElement;
+
+                if (!viewport) {
+                    viewport = scrollAreaRef.current.querySelector(
+                        '.h-full.w-full'
+                    ) as HTMLElement;
+                }
+
+                if (!viewport && scrollAreaRef.current.firstElementChild) {
+                    viewport = scrollAreaRef.current
+                        .firstElementChild as HTMLElement;
+                }
+
+                if (viewport) {
+                    viewport.scrollTo({
+                        top: viewport.scrollHeight,
+                        behavior: 'smooth',
+                    });
+                }
+            }
+        });
+    };
+
     useEffect(() => {
-        // Scroll to bottom when new messages are added
-        if (scrollAreaRef.current) {
-            scrollAreaRef.current.scrollTop =
-                scrollAreaRef.current.scrollHeight;
-        }
-    }, [messages]);
+        // Scroll to bottom when messages change or loading state changes
+        scrollToBottom();
+    }, [messages, isLoading]);
 
     useEffect(() => {
         if (
@@ -59,12 +99,15 @@ const Conversation = () => {
             conversationData.history
         ) {
             setMessages(
-                conversationData.history.map((history) => ({
-                    id: history._id,
-                    content: history.content,
-                    role: history.role,
-                    timestamp: new Date(history.createdAt),
-                }))
+                conversationData.history.map(
+                    (history: KBConversationHistory) => ({
+                        id: history._id,
+                        content: history.content,
+                        role: history.role,
+                        documents: history.references || [],
+                        timestamp: new Date(history.createdAt),
+                    })
+                )
             );
         }
     }, [isConversationSuccess, conversationData]);
@@ -82,7 +125,7 @@ const Conversation = () => {
         setMessages((prev) => [...prev, userMessage]);
         setIsLoading(true);
 
-        alert('input value: ' + inputValue);
+        // alert('input value: ' + inputValue);
 
         // Implement the API call to the kbQueryService
         try {
@@ -97,14 +140,7 @@ const Conversation = () => {
                     content: kbResponse.response,
                     role: 'assistant',
                     timestamp: new Date(),
-                    documents: [
-                        // {
-                        //     id: '1',
-                        //     title: 'Knowledge Base Response',
-                        //     url: '#',
-                        //     preview: `Query: ${kbResponse.query}`,
-                        // },
-                    ],
+                    documents: kbResponse.references || [],
                 };
 
                 setMessages((prev) => [...prev, assistantMessage]);
@@ -165,19 +201,35 @@ const Conversation = () => {
         action: 'view' | 'download',
         doc: Document
     ) => {
-        if (action === 'download') {
+        if (doc.url) {
             toast({
-                title: 'Download Started',
-                description: `Downloading ${doc.title}...`,
+                title: 'Redirecting',
+                description: `Redirecting to ${doc.title}...`,
             });
-            // Implement actual download logic here
+            const url = `${import.meta.env.VITE_API_ROOTURL}/uploads/${
+                doc.url
+            }`;
+            return window.open(url, '_blank');
         } else {
             toast({
-                title: 'Opening Document',
-                description: `Opening ${doc.title} for viewing...`,
+                title: 'Error',
+                description: 'No URL found for the document.',
             });
-            // Implement actual view logic here
         }
+        return;
+        // if (action === 'download') {
+        //     toast({
+        //         title: 'Download Started',
+        //         description: `Downloading ${doc.title}...`,
+        //     });
+        //     // Implement actual download logic here
+        // } else {
+        //     toast({
+        //         title: 'Opening Document',
+        //         description: `Opening ${doc.title} for viewing...`,
+        //     });
+        //     // Implement actual view logic here
+        // }
     };
 
     if (isConversationSuccess && !conversationData) {
@@ -379,7 +431,7 @@ const Conversation = () => {
                                                                                 )}
                                                                             </div>
                                                                             <div className="flex space-x-1 ml-2">
-                                                                                <Button
+                                                                                {/* <Button
                                                                                     size="sm"
                                                                                     variant="ghost"
                                                                                     onClick={() =>
@@ -390,7 +442,7 @@ const Conversation = () => {
                                                                                     }
                                                                                 >
                                                                                     <Eye className="h-3 w-3" />
-                                                                                </Button>
+                                                                                </Button> */}
                                                                                 <Button
                                                                                     size="sm"
                                                                                     variant="ghost"

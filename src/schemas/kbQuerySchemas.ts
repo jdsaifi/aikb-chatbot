@@ -3,10 +3,18 @@ export interface KBQueryRequest {
     query: string;
 }
 
+export interface Reference {
+    id: string;
+    title: string;
+    preview?: string;
+    url?: string; // for pdf files
+}
+
 export interface KBQueryResponse {
     conversationId: string;
     query: string;
     response: string;
+    references: Reference[];
 }
 
 export interface KBQueryApiResponse {
