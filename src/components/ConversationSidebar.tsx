@@ -1,11 +1,12 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useKBConversations } from '@/hooks/useKBQuery';
-import { MessageSquare, Plus, Bot } from 'lucide-react';
+import { MessageSquare, Plus, Bot, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Separator } from '@radix-ui/react-separator';
 
 const ConversationSidebar = () => {
     const navigate = useNavigate();
@@ -67,12 +68,27 @@ const ConversationSidebar = () => {
                         </AvatarFallback>
                     </Avatar>
                     <div>
-                        <h2 className="text-lg font-semibold">Chat History</h2>
+                        <h2 className="text-lg font-semibold">
+                            AI Knowledge Base
+                        </h2>
                         <p className="text-sm text-muted-foreground">
                             Your conversations
                         </p>
                     </div>
                 </div>
+
+                <Button
+                    onClick={handleNewChat}
+                    className="w-full"
+                    variant={'default'}
+                    asChild
+                >
+                    <Link to="/documents">
+                        <FileText className="h-4 w-4 mr-2" />
+                        My Documents
+                    </Link>
+                </Button>
+                <Separator className="my-2" />
                 <Button
                     onClick={handleNewChat}
                     className="w-full"

@@ -5,8 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { useAuthStore } from '@/stores/authStore';
 import { useKBQuery } from '@/hooks/useKBQuery';
+import { useLLMModels } from '@/hooks/useLLMModels';
 import { Send, LogOut, FileText, Download, Eye, Bot, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ConversationSidebar from '@/components/ConversationSidebar';
@@ -32,11 +40,22 @@ const Chat = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedModel, setSelectedModel] = useState<string>('');
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const { user, logout } = useAuthStore();
     const { toast } = useToast();
     const navigate = useNavigate();
     const { query: executeKBQuery } = useKBQuery();
+    const { models, isLoading: isLoadingModels } = useLLMModels();
+
+    console.log('\n\n\nmodels: ', models);
+
+    // Set default model when models are loaded
+    useEffect(() => {
+        if (models.length > 0 && !selectedModel) {
+            setSelectedModel(models[0].id);
+        }
+    }, [models, selectedModel]);
 
     const scrollToBottom = () => {
         // Use requestAnimationFrame to ensure DOM has updated
@@ -97,7 +116,8 @@ const Chat = () => {
         try {
             const response: KBQueryApiResponse = await executeKBQuery(
                 conversationId,
-                inputValue
+                inputValue,
+                selectedModel
             );
 
             if (response && response.data && response.data.length > 0) {
@@ -435,6 +455,32 @@ const Chat = () => {
                 <div className="p-4 border-t bg-card">
                     <div className="max-w-4xl mx-auto">
                         <div className="flex space-x-2">
+                            {/* llm model selector */}
+                            <Select
+                                value={selectedModel}
+                                onValueChange={setSelectedModel}
+                                disabled={isLoadingModels || isLoading}
+                            >
+                                <SelectTrigger className="w-[200px]">
+                                    <SelectValue
+                                        placeholder={
+                                            isLoadingModels
+                                                ? 'Loading models...'
+                                                : 'Select model'
+                                        }
+                                    />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {models.map((model) => (
+                                        <SelectItem
+                                            key={model.id}
+                                            value={model.id}
+                                        >
+                                            {model.title} ({model.provider})
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                             <Input
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}

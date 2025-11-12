@@ -13,6 +13,14 @@ import { useQuery } from '@tanstack/react-query';
 import { kbQueryService } from '../services/kbQueryService';
 import ConversationSidebar from '@/components/ConversationSidebar';
 import { Reference } from '../schemas/kbQuerySchemas';
+import { useLLMModels } from '../hooks/useLLMModels';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 interface Message {
     id: string;
@@ -46,6 +54,7 @@ const Conversation = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedModel, setSelectedModel] = useState<string>('');
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const { user, logout } = useAuthStore();
     const { toast } = useToast();
@@ -53,6 +62,13 @@ const Conversation = () => {
     const { query: executeKBQuery } = useKBQuery();
     const { data: conversationData, isSuccess: isConversationSuccess } =
         useKBConversation(conversationId);
+    const { models, isLoading: isLoadingModels } = useLLMModels();
+    // Set default model when models are loaded
+    useEffect(() => {
+        if (models.length > 0 && !selectedModel) {
+            setSelectedModel(models[0].id);
+        }
+    }, [models, selectedModel]);
 
     // console.log('data:', conversationData);
 
@@ -129,7 +145,11 @@ const Conversation = () => {
 
         // Implement the API call to the kbQueryService
         try {
-            const response = await executeKBQuery(conversationId, inputValue);
+            const response = await executeKBQuery(
+                conversationId,
+                inputValue,
+                selectedModel
+            );
             setInputValue('');
 
             if (response && response.data && response.data.length > 0) {
@@ -496,6 +516,33 @@ const Conversation = () => {
                 <div className="p-4 border-t bg-card">
                     <div className="max-w-4xl mx-auto">
                         <div className="flex space-x-2">
+                            {/* llm model selector */}
+                            <Select
+                                value={selectedModel}
+                                onValueChange={setSelectedModel}
+                                disabled={isLoadingModels || isLoading}
+                            >
+                                <SelectTrigger className="w-[200px]">
+                                    <SelectValue
+                                        placeholder={
+                                            isLoadingModels
+                                                ? 'Loading models...'
+                                                : 'Select model'
+                                        }
+                                    />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {models.map((model) => (
+                                        <SelectItem
+                                            key={model.id}
+                                            value={model.id}
+                                        >
+                                            {model.title} ({model.provider})
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {/* input */}
                             <Input
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}

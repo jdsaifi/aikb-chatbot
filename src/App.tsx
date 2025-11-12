@@ -9,6 +9,8 @@ import Auth from './pages/Auth';
 import Chat from './pages/Chat';
 import NotFound from './pages/NotFound';
 import Conversation from './pages/Conversation';
+import Documents from './pages/Documents';
+import DocumentView from './pages/DocumentView';
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,24 @@ const App = () => (
                         element={
                             <ProtectedRoute>
                                 <Conversation />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/documents"
+                        element={
+                            <ProtectedRoute>
+                                <Documents />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/documents/:documentId"
+                        element={
+                            <ProtectedRoute>
+                                <DocumentView />
                             </ProtectedRoute>
                         }
                     />

@@ -31,13 +31,21 @@ export const useKBQuery = () => {
         },
     });
 
-    const query = async (conversationId: string, queryString: string) => {
+    const query = async (
+        conversationId: string,
+        queryString: string,
+        modelId: string
+    ) => {
         if (!queryString?.trim()) {
             setError('Query cannot be empty');
             return;
         }
 
-        return mutation.mutateAsync({ query: queryString, conversationId });
+        return mutation.mutateAsync({
+            query: queryString,
+            conversationId,
+            model: modelId,
+        });
     };
 
     return {

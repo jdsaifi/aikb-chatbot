@@ -14,6 +14,49 @@ export interface ApiError {
 }
 
 export const authService = {
+    async validateToken(token: string): Promise<User> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/me`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(
+                    errorData.message ||
+                        `HTTP error! status: ${response.status}`
+                );
+            }
+
+            const data = await response.json();
+
+            // Handle different possible response structures
+            if (
+                data.status === 'success' &&
+                data.data &&
+                data.data.length > 0
+            ) {
+                return data.data[0];
+            } else if (data._id || data.id) {
+                // Direct user object
+                return data;
+            } else {
+                throw new Error('Invalid response format from server');
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new Error(error.message);
+            }
+            throw new Error(
+                'An unexpected error occurred during token validation'
+            );
+        }
+    },
+
     async login(credentials: LoginFormData): Promise<LoginResponse> {
         try {
             const response = await fetch(`${API_BASE_URL}/auth/login`, {

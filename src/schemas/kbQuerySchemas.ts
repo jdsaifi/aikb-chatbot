@@ -1,6 +1,7 @@
 export interface KBQueryRequest {
     conversationId?: string;
     query: string;
+    model: string;
 }
 
 export interface Reference {
