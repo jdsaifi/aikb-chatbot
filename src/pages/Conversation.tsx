@@ -280,10 +280,10 @@ const Conversation = () => {
                             </Avatar>
                             <div>
                                 <h1 className="text-xl font-semibold">
-                                    Knowledge Base Chat
+                                    Neeti AI
                                 </h1>
                                 <p className="text-sm text-muted-foreground">
-                                    AI Assistant
+                                    {/* AI Assistant */}
                                 </p>
                             </div>
                         </div>
@@ -343,11 +343,9 @@ const Conversation = () => {
                             </AvatarFallback>
                         </Avatar>
                         <div>
-                            <h1 className="text-xl font-semibold">
-                                Knowledge Base Chat
-                            </h1>
+                            <h1 className="text-xl font-semibold">Neeti AI</h1>
                             <p className="text-sm text-muted-foreground">
-                                AI Assistant
+                                {/* AI Assistant */}
                             </p>
                         </div>
                     </div>

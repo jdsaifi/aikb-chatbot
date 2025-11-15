@@ -33,9 +33,7 @@ const Index = () => {
                 <div className="container mx-auto px-4 py-4 flex justify-between items-center">
                     <div className="flex items-center space-x-2">
                         <Bot className="h-6 w-6 text-primary" />
-                        <span className="font-semibold">
-                            Knowledge Base Chat
-                        </span>
+                        <span className="font-semibold">Neeti AI</span>
                     </div>
                     <div className="flex items-center space-x-4">
                         <span className="text-sm text-muted-foreground">
@@ -62,7 +60,7 @@ const Index = () => {
                         </div>
                     </div>
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                        Knowledge Base Chat
+                        Neeti AI
                     </h1>
                     <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
                         Get instant answers from our AI assistant powered by

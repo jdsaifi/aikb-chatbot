@@ -77,7 +77,6 @@ const Auth = () => {
                             alt="Knowledge Base"
                             className="w-30 h-20 mx-auto"
                         />
-                        Knowledge Base Chat
                     </CardTitle>
                     <CardDescription>
                         Sign in to your account or create a new one
