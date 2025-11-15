@@ -155,13 +155,23 @@ const Conversation = () => {
             if (response && response.data && response.data.length > 0) {
                 const kbResponse = response.data[0];
 
-                const assistantMessage: Message = {
-                    id: (Date.now() + 1).toString(),
-                    content: kbResponse.response,
-                    role: 'assistant',
-                    timestamp: new Date(),
-                    documents: kbResponse.references || [],
-                };
+                let assistantMessage: Message;
+                if ('message' in kbResponse) {
+                    assistantMessage = {
+                        id: (Date.now() + 1).toString(),
+                        content: kbResponse.message as string,
+                        role: 'assistant',
+                        timestamp: new Date(),
+                    };
+                } else {
+                    assistantMessage = {
+                        id: (Date.now() + 1).toString(),
+                        content: kbResponse.response,
+                        role: 'assistant',
+                        timestamp: new Date(),
+                        documents: kbResponse.references || [],
+                    };
+                }
 
                 setMessages((prev) => [...prev, assistantMessage]);
             } else {

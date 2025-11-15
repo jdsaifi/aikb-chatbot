@@ -24,7 +24,14 @@ const DocumentSidebar = () => {
         <div className="w-80 h-full bg-card border-r flex flex-col">
             {/* Header */}
             <div className="p-4 border-b">
-                <div className="flex items-center space-x-3 mb-4">
+                <div className="flex items-center justify-center mb-4">
+                    <img
+                        src="/neetiai-logo.png"
+                        alt="Knowledge Base"
+                        className="w-30 h-20 mx-auto"
+                    />
+                </div>
+                {/* <div className="flex items-center space-x-3 mb-4">
                     <Avatar className="h-8 w-8">
                         <AvatarFallback className="bg-primary text-primary-foreground">
                             <Bot className="h-4 w-4" />
@@ -38,7 +45,7 @@ const DocumentSidebar = () => {
                             Your documents
                         </p>
                     </div>
-                </div>
+                </div> */}
 
                 <Button className="w-full" variant={'default'} asChild>
                     <Link to="/chat">

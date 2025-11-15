@@ -72,6 +72,11 @@ const Auth = () => {
             <Card className="w-full max-w-md">
                 <CardHeader className="text-center">
                     <CardTitle className="text-2xl font-bold">
+                        <img
+                            src="/neetiai-logo.png"
+                            alt="Knowledge Base"
+                            className="w-30 h-20 mx-auto"
+                        />
                         Knowledge Base Chat
                     </CardTitle>
                     <CardDescription>
